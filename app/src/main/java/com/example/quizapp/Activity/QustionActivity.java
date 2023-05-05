@@ -114,7 +114,7 @@ public class QustionActivity extends AppCompatActivity {
 
 
     private void restTimer() {
-        timer = new CountDownTimer(30000,100) {
+        timer = new CountDownTimer(30000,10) {
             @Override
             public void onTick(long millisUntilFinished) {
                 binding.time.setText(String.valueOf(millisUntilFinished / 1000));
