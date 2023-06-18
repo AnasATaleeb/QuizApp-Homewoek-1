@@ -6,9 +6,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.animation.Animator;
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.DecelerateInterpolator;
@@ -19,18 +22,21 @@ import com.example.quizapp.Models.QustionModel;
 import com.example.quizapp.R;
 import com.example.quizapp.databinding.ActivityQustionBinding;
 import com.example.quizapp.databinding.ActivitySetsBinding;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 
 public class QustionActivity extends AppCompatActivity {
 
-    ArrayList<QustionModel> list = new ArrayList<>();
+    QustionModel[] list  = new QustionModel[5];
     private int count=0;
     private int position =0;
     private int Score =0;
     CountDownTimer timer;
 
     ActivityQustionBinding binding;
+
+    SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,7 +85,7 @@ public class QustionActivity extends AppCompatActivity {
 
         }
 
-        playAnimation(binding.qustion,0,list.get(position).getQustion());
+        playAnimation(binding.qustion,0,list[position].getQustion());
 
         binding.btnNext.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -95,17 +101,23 @@ public class QustionActivity extends AppCompatActivity {
                 enableOption(true);
                 position++;
 
-                if(position == list.size()){
+                if(position == list.length){
                     Intent intent = new Intent(QustionActivity.this,ScoreActivity.class);
-                    intent.putExtra("score",Score);
-                    intent.putExtra("total",list.size());
+
+                    sharedPreferences = QustionActivity.this.getSharedPreferences("main", Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+
+                    editor.putInt("score", Score);
+                    editor.putInt("total", list.length);
+                    editor.commit();
+
                     startActivity(intent);
                     finish();
                     return;
                 }
 
                 count =0;
-                playAnimation(binding.qustion,0,list.get(position).getQustion());
+                playAnimation(binding.qustion,0,list[position].getQustion());
             }
         });
 
@@ -132,7 +144,6 @@ public class QustionActivity extends AppCompatActivity {
                     public void onClick(View v) {
                         Intent intent = new Intent(QustionActivity.this,SetsActivity.class);
                         startActivity(intent);
-                        finish();
                     }
                 });
 
@@ -150,13 +161,13 @@ public class QustionActivity extends AppCompatActivity {
                             String option = "";
 
                             if (count == 0) {
-                                option  = list.get(position).getOptionA();
+                                option  = list[position].getOptionA();
                             }else if (count == 1) {
-                                option = list.get(position).getOptionB();
+                                option = list[position].getOptionB();
                             }else if (count == 2) {
-                                option = list.get(position).getOptionC();
+                                option = list[position].getOptionC();
                             }else if (count == 3) {
-                                option = list.get(position).getOptionD();
+                                option = list[position].getOptionD();
                             }
 
                             playAnimation((TextView) binding.OptionContainer.getChildAt(count),0,option);
@@ -169,7 +180,7 @@ public class QustionActivity extends AppCompatActivity {
                         if(i==0){
                             try{
                                 ((TextView)qustion).setText(qustion1);
-                                binding.totalQustion.setText(position+1+"/"+list.size());
+                                binding.totalQustion.setText(position+1+"/"+list.length);
                             }catch (Exception e){
                                 ((Button)qustion).setText(qustion1);
                             }
@@ -211,210 +222,293 @@ public class QustionActivity extends AppCompatActivity {
         binding.btnNext.setEnabled(true);
         binding.btnNext.setAlpha(1);
 
-        if(selectedOption.getText().toString().equals(list.get(position).getCorrectAnswer())){
+        if(selectedOption.getText().toString().equals(list[position].getCorrectAnswer())){
             Score++;
             selectedOption.setBackgroundResource(R.drawable.right_ans);
         }
         else {
             selectedOption.setBackgroundResource(R.drawable.wrong_ans);
 
-            Button correctOption = (Button) binding.OptionContainer.findViewWithTag(list.get(position).getCorrectAnswer());
+            Button correctOption = (Button) binding.OptionContainer.findViewWithTag(list[position].getCorrectAnswer());
             correctOption.setBackgroundResource(R.drawable.right_ans);
         }
     }
 
     private void setTwo() {
+        list = new QustionModel[5];
 
-        list.add(new QustionModel("ما هي الآلات التي تستخدم في معالجة الخشب؟",
+        list[0] =(new QustionModel("ما هي الآلات التي تستخدم في معالجة الخشب؟",
                 "أ) المثقاب الكهربائي","ب) المنشار الكهربائي","ج) الفرز الكهربائي","د) جميع ما ذكر","د) جميع ما ذكر"));
 
-        list.add(new QustionModel("ما هي الميزة الرئيسية للاستخدامات الصناعية للروبوتات؟",
+        list[1] =(new QustionModel("ما هي الميزة الرئيسية للاستخدامات الصناعية للروبوتات؟",
                 "أ) تقليل التكلفة","ب) زيادة الإنتاجية","ج) تحسين الدقة","د) جميع ما ذكر","د) جميع ما ذكر"));
 
 
-        list.add(new QustionModel("ما هو النظام الذي يستخدمه الحاسوب لتنظيم وحفظ الملفات؟",
+        list[2] =(new QustionModel("ما هو النظام الذي يستخدمه الحاسوب لتنظيم وحفظ الملفات؟",
                 "أ) نظام التشغيل","ب) برنامج الوورد","ج) برنامج الإكسل","د) برنامج الفوتوشوب","أ) نظام التشغيل"));
 
-        list.add(new QustionModel("ما هو البرنامج الذي يستخدم لتحرير وإنتاج الأفلام السينمائية؟",
+        list[3] =(new QustionModel("ما هو البرنامج الذي يستخدم لتحرير وإنتاج الأفلام السينمائية؟",
                 "أ) برنامج الفوتوشوب","ب) برنامج الإليستريتور","ج) برنامج الأدوبي بريمير","د) برنامج الإنديزاين","ج) برنامج الأدوبي بريمير"));
 
-        list.add(new QustionModel("ما هي الوحدة الأساسية لقياس الحجم؟",
+        list[4] =(new QustionModel("ما هي الوحدة الأساسية لقياس الحجم؟",
                 "أ) المتر المكعب","ب)  اللتر","ج) الكيلوغرام","د) الجرام","ب)  اللتر"));
 
-        
+
+        sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Gson gson = new Gson();
+        editor.putString("setTwo", gson.toJson(list));
+        editor.commit();
+
+        String s = sharedPreferences.getString("setTwo",null);
+        list = gson.fromJson(s,QustionModel[].class);
+
+
     }
 
     private void setOne() {
-           list.add(new QustionModel("ما هي الآلة التي تستخدم لقياس قوة الرياح؟",
+        list = new QustionModel[5];
+        list[0] =(new QustionModel("ما هي الآلة التي تستخدم لقياس قوة الرياح؟",
                 "أ) الميزان","ب) الأنيموميتر","ج)  البروميتر","د)  الهيدروميتر","ب) الأنيموميتر"));
 
-        list.add(new QustionModel("من مميزات التطبيقات الهجينة :",
+        list[1] =(new QustionModel("من مميزات التطبيقات الهجينة :",
                 "عالي التكلفة","يحتاج الى مهارات عالية","تجده في أكثر من متجر","برمجته صعبة","تجده في أكثر من متجر"));
 
 
-        list.add(new QustionModel("امتداد الملف في نظام IOS ؟",
+        list[2] =(new QustionModel("امتداد الملف في نظام IOS ؟",
                 "Ipa","Aia","Apk","Xap","Ipa"));
 
-        list.add(new QustionModel("ما هو الجزء المسؤول عن توزيع الطاقة الكهربائية في الحاسوب؟",
+        list[3] =(new QustionModel("ما هو الجزء المسؤول عن توزيع الطاقة الكهربائية في الحاسوب؟",
                 "أ) وحدة المعالجة المركزية","ب) اللوحة الأم","ج)  بطاقة الرسومات","د) مزود الطاقة","د) مزود الطاقة"));
 
-        list.add(new QustionModel("ما هو المصطلح الذي يشير إلى القدرة على استخدام التكنولوجيا لتحليل البيانات واستخلاص المعلومات منها؟",
+        list[4] =(new QustionModel("ما هو المصطلح الذي يشير إلى القدرة على استخدام التكنولوجيا لتحليل البيانات واستخلاص المعلومات منها؟",
                 "أ) الإنتاجية","ب) البرمجة","ج) التحليل البياني","د) التعاون الإلكتروني","ج) التحليل البياني"));
 
+        sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Gson gson = new Gson();
+        editor.putString("setOne", gson.toJson(list));
+        editor.commit();
+        String s = sharedPreferences.getString("setOne",null);
+        list = gson.fromJson(s,QustionModel[].class);
     }
 
     private void setThree() {
-        list.add(new QustionModel("ما هي الوحدة التي تستخدم لقياس التردد؟",
+        list = new QustionModel[5];
+        list[0] =(new QustionModel("ما هي الوحدة التي تستخدم لقياس التردد؟",
                 "أ) الهيرتز (Hz)","ب) الأمبير (A)","ج) الفولت (V)","د) الواط (W)","أ) الهيرتز (Hz)"));
 
-        list.add(new QustionModel("ما هي الوحدة التي تستخدم لقياس الكهرباء؟",
+        list[1] =(new QustionModel("ما هي الوحدة التي تستخدم لقياس الكهرباء؟",
                 "أ) الهيرتز (Hz)","ب) الأمبير (A)","ج) الفولت (V)","د) الواط (W)","ب) الأمبير (A)"));
 
 
-        list.add(new QustionModel("ما هي الأداة التي تستخدم لتحديد اتجاه القبلة؟",
+        list[2] =(new QustionModel("ما هي الأداة التي تستخدم لتحديد اتجاه القبلة؟",
                 "أ) البوصلة","ب) الليزر","ج) الميزان","د) المنظار","أ) البوصلة"));
 
-        list.add(new QustionModel("ما هو النظام الذي يستخدم للتحقق من هوية المستخدم في الحواسيب؟",
+        list[3] =(new QustionModel("ما هو النظام الذي يستخدم للتحقق من هوية المستخدم في الحواسيب؟",
                 "أ) نظام التشغيل","ب) نظام إدارة قواعد البيانات","ج)  نظام تشفير البيانات","د) نظام تسجيل الدخول","د) نظام تسجيل الدخول"));
 
-        list.add(new QustionModel("ما هي الطريقة التي يتم بها تخزين البيانات في الحواسيب؟",
+        list[4] =(new QustionModel("ما هي الطريقة التي يتم بها تخزين البيانات في الحواسيب؟",
                 "أ)  بالطباعة","ب) على الأشرطة المغناطيسية","ج) على الأقراص المدمجة","د) على الأقراص المرنة","ج) على الأقراص المدمجة"));
 
+        sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Gson gson = new Gson();
+        editor.putString("setThree", gson.toJson(list));
+        editor.commit();
+        String s = sharedPreferences.getString("setThree",null);
+        list = gson.fromJson(s,QustionModel[].class);
     }
 
     private void setFour() {
-        list.add(new QustionModel("ما هي الوحدة التي تستخدم لقياس الشدة الكهربائية؟",
+        list = new QustionModel[5];
+        list[0] =(new QustionModel("ما هي الوحدة التي تستخدم لقياس الشدة الكهربائية؟",
                 "أ) الهيرتز (Hz)","ب)  الأمبير (A)","ج) الفولت (V)","د) الواط (W)","ج) الفولت (V)"));
 
-        list.add(new QustionModel("ما هو النظام الذي يستخدم لتخزين البيانات بشكل دائم في الحواسيب؟",
+        list[1] =(new QustionModel("ما هو النظام الذي يستخدم لتخزين البيانات بشكل دائم في الحواسيب؟",
                 "أ) الذاكرة العشوائية (RAM)","ب) الذاكرة الخارجية","ج) القرص الصلب (Hard Disk)","د) الذاكرة التخزينية الفلاشية (Flash Memory)","ج) القرص الصلب (Hard Disk)"));
 
 
-        list.add(new QustionModel("ما هو النظام الذي يستخدم لإدارة وتحليل البيانات في الحواسيب؟",
+        list[2] =(new QustionModel("ما هو النظام الذي يستخدم لإدارة وتحليل البيانات في الحواسيب؟",
                 "أ) نظام التشغيل","ب) نظام إدارة قواعد البيانات","ج) نظام تشفير البيانات","د) نظام تسجيل الدخول","ب) نظام إدارة قواعد البيانات"));
 
-        list.add(new QustionModel("ما هو النظام الذي يستخدم لتشفير البيانات وحمايتها من الاختراق؟",
+        list[3] =(new QustionModel("ما هو النظام الذي يستخدم لتشفير البيانات وحمايتها من الاختراق؟",
                 "أ) نظام التشغيل","ب) نظام إدارة قواعد البيانات","ج) نظام تشفير البيانات","د) نقل البيانات بين الحواسيب","ج) نظام تشفير البيانات"));
 
-        list.add(new QustionModel("ما هو الجهاز الذي يستخدم لإدخال البيانات في الحاسوب؟",
+        list[4] =(new QustionModel("ما هو الجهاز الذي يستخدم لإدخال البيانات في الحاسوب؟",
                 "أ) الشاشة","ب) الطابعة","ج) الفأرة","د) لوحة المفاتيح","د) لوحة المفاتيح"));
 
+        sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Gson gson = new Gson();
+        editor.putString("setFour", gson.toJson(list));
+        editor.commit();
+        String s = sharedPreferences.getString("setFour",null);
+        list = gson.fromJson(s,QustionModel[].class);
     }
 
     private void setFive() {
-        list.add(new QustionModel("ما هي الوحدة التي تستخدم لقياس سرعة المعالجة في الحاسوب؟",
+        list = new QustionModel[5];
+        list[0] =(new QustionModel("ما هي الوحدة التي تستخدم لقياس سرعة المعالجة في الحاسوب؟",
                 "أ) البت في الثانية (bps)","ب)  الهيرتز (Hz)","ج) الغيغاهيرتز (GHz)","د) الرامات (RAM)","ج) الغيغاهيرتز (GHz)"));
 
-        list.add(new QustionModel("ما هو البرنامج الذي يتيح للمستخدمين تصفح الإنترنت؟",
+        list[1] =(new QustionModel("ما هو البرنامج الذي يتيح للمستخدمين تصفح الإنترنت؟",
                 "أ) محرك البحث","ب) متصفح الويب","ج) برنامج البريد الإلكتروني","د) برنامج تحميل الملفات","ب) متصفح الويب"));
 
 
-        list.add(new QustionModel("ما هو الجهاز الذي يستخدم لتخزين الطاقة الكهربائية في الحواسيب؟",
+        list[2] =(new QustionModel("ما هو الجهاز الذي يستخدم لتخزين الطاقة الكهربائية في الحواسيب؟",
                 "أ) البطارية (Battery)","ب) الشاحن (Charger)","ج)  محول الطاقة (Power Supply Unit)","د) الجهاز المستقل (UPS)","ج)  محول الطاقة (Power Supply Unit)"));
 
-        list.add(new QustionModel("ما هو البرنامج الذي يستخدم لإنشاء الرسوم البيانية والتخطيطات البيانية؟",
+        list[3] =(new QustionModel("ما هو البرنامج الذي يستخدم لإنشاء الرسوم البيانية والتخطيطات البيانية؟",
                 "أ) برنامج معالجة النصوص","ب) برنامج الرسم","ج)  برنامج قواعد البيانات","د) برنامج الجداول الإلكترونية","ب) برنامج الرسم"));
 
-        list.add(new QustionModel("ما هو النظام الذي يستخدم للتواصل بين الأجهزة في شبكة الحاسوب؟",
+        list[4] =(new QustionModel("ما هو النظام الذي يستخدم للتواصل بين الأجهزة في شبكة الحاسوب؟",
                 "أ) نظام التشغيل","ب) ظام البريد الإلكتروني","ج)  نظام الاتصالات","د) نظام الملفات","ج)  نظام الاتصالات"));
 
+        sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Gson gson = new Gson();
+        editor.putString("setFive", gson.toJson(list));
+        editor.commit();
+        String s = sharedPreferences.getString("setFive",null);
+        list = gson.fromJson(s,QustionModel[].class);
     }
 
 
     private void setSex() {
-        list.add(new QustionModel("ما هو النظام الذي يستخدم لتخزين البيانات والبرامج في الحاسوب؟",
+        list = new QustionModel[5];
+        list[0] =(new QustionModel("ما هو النظام الذي يستخدم لتخزين البيانات والبرامج في الحاسوب؟",
                 "أ) وحدة المعالجة المركزية","ب) الذاكرة العشوائية","ج) الذاكرة الدائمة","د) اللوحة الأم","ج) الذاكرة الدائمة"));
 
-        list.add(new QustionModel("ما هي العناصر التي تشكل مخطط الدائرة الكهربائية؟",
+        list[1] =(new QustionModel("ما هي العناصر التي تشكل مخطط الدائرة الكهربائية؟",
                 "أ) المقاومة والكابلات","ب) المصابيح والمحركات","ج) المقاومة والمكثفات والملفات الكهربائية","د) المحولات والبطاريات","ج) المقاومة والمكثفات والملفات الكهربائية"));
 
 
-        list.add(new QustionModel("ما هو البرنامج الذي يستخدم لتحرير الصور وتعديلها؟",
+        list[2] =(new QustionModel("ما هو البرنامج الذي يستخدم لتحرير الصور وتعديلها؟",
                 "أ) برنامج الرسم","ب) برنامج المعالجة النصية","ج)  برنامج المعالجة الصوتية","د) برنامج التحرير الرقمي للصور","د) برنامج التحرير الرقمي للصور"));
 
-        list.add(new QustionModel("ما هي وظيفة الشاشة في الحاسوب؟",
+        list[3] =(new QustionModel("ما هي وظيفة الشاشة في الحاسوب؟",
                 "أ) عرض النصوص والصور","ب) إدخال البيانات","ج) تخزين البيانات","د) نقل البيانات بين الحواسيب","أ) عرض النصوص والصور"));
 
-        list.add(new QustionModel("ما هو الجهاز الذي يستخدم لإدخال البيانات في الحاسوب؟",
+        list[4] =(new QustionModel("ما هو الجهاز الذي يستخدم لإدخال البيانات في الحاسوب؟",
                 "أ) الشاشة","ب) الطابعة","ج) الفأرة","د) لوحة المفاتيح","د) لوحة المفاتيح"));
 
+        sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Gson gson = new Gson();
+        editor.putString("setSex", gson.toJson(list));
+        editor.commit();
+        String s = sharedPreferences.getString("setSex",null);
+        list = gson.fromJson(s,QustionModel[].class);
     }
 
     private void setSeven() {
-        list.add(new QustionModel("ما هو النظام الذي يستخدم لتخزين البيانات والبرامج في الحاسوب؟",
+        list = new QustionModel[5];
+        list[0] =(new QustionModel("ما هو النظام الذي يستخدم لتخزين البيانات والبرامج في الحاسوب؟",
                 "أ) وحدة المعالجة المركزية","ب) الذاكرة العشوائية","ج) الذاكرة الدائمة","د) اللوحة الأم","ج) الذاكرة الدائمة"));
 
-        list.add(new QustionModel("ما هي العناصر التي تشكل مخطط الدائرة الكهربائية؟",
+        list[1] =(new QustionModel("ما هي العناصر التي تشكل مخطط الدائرة الكهربائية؟",
                 "أ) المقاومة والكابلات","ب) المصابيح والمحركات","ج) المقاومة والمكثفات والملفات الكهربائية","د) المحولات والبطاريات","ج) المقاومة والمكثفات والملفات الكهربائية"));
 
 
-        list.add(new QustionModel("ما هو البرنامج الذي يستخدم لتحرير الصور وتعديلها؟",
+        list[2] =(new QustionModel("ما هو البرنامج الذي يستخدم لتحرير الصور وتعديلها؟",
                 "أ) برنامج الرسم","ب) برنامج المعالجة النصية","ج)  برنامج المعالجة الصوتية","د) برنامج التحرير الرقمي للصور","د) برنامج التحرير الرقمي للصور"));
 
-        list.add(new QustionModel("ما هي وظيفة الشاشة في الحاسوب؟",
+        list[3] =(new QustionModel("ما هي وظيفة الشاشة في الحاسوب؟",
                 "أ) عرض النصوص والصور","ب) إدخال البيانات","ج) تخزين البيانات","د) نقل البيانات بين الحواسيب","أ) عرض النصوص والصور"));
 
-        list.add(new QustionModel("ما هو الجهاز الذي يستخدم لإدخال البيانات في الحاسوب؟",
+        list[4] =(new QustionModel("ما هو الجهاز الذي يستخدم لإدخال البيانات في الحاسوب؟",
                 "أ) الشاشة","ب) الطابعة","ج) الفأرة","د) لوحة المفاتيح","د) لوحة المفاتيح"));
 
+        sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Gson gson = new Gson();
+        editor.putString("setSeven", gson.toJson(list));
+        editor.commit();
+        String s = sharedPreferences.getString("setSeven",null);
+        list = gson.fromJson(s,QustionModel[].class);
     }
 
     private void setEight() {
-        list.add(new QustionModel("ما هو النظام الذي يستخدم لتخزين البيانات والبرامج في الحاسوب؟",
+        list = new QustionModel[5];
+        list[0] =(new QustionModel("ما هو النظام الذي يستخدم لتخزين البيانات والبرامج في الحاسوب؟",
                 "أ) وحدة المعالجة المركزية","ب) الذاكرة العشوائية","ج) الذاكرة الدائمة","د) اللوحة الأم","ج) الذاكرة الدائمة"));
 
-        list.add(new QustionModel("ما هي العناصر التي تشكل مخطط الدائرة الكهربائية؟",
+        list[1] =(new QustionModel("ما هي العناصر التي تشكل مخطط الدائرة الكهربائية؟",
                 "أ) المقاومة والكابلات","ب) المصابيح والمحركات","ج) المقاومة والمكثفات والملفات الكهربائية","د) المحولات والبطاريات","ج) المقاومة والمكثفات والملفات الكهربائية"));
 
 
-        list.add(new QustionModel("ما هو البرنامج الذي يستخدم لتحرير الصور وتعديلها؟",
+        list[2] =(new QustionModel("ما هو البرنامج الذي يستخدم لتحرير الصور وتعديلها؟",
                 "أ) برنامج الرسم","ب) برنامج المعالجة النصية","ج)  برنامج المعالجة الصوتية","د) برنامج التحرير الرقمي للصور","د) برنامج التحرير الرقمي للصور"));
 
-        list.add(new QustionModel("ما هي وظيفة الشاشة في الحاسوب؟",
+        list[3] =(new QustionModel("ما هي وظيفة الشاشة في الحاسوب؟",
                 "أ) عرض النصوص والصور","ب) إدخال البيانات","ج) تخزين البيانات","د) نقل البيانات بين الحواسيب","أ) عرض النصوص والصور"));
 
-        list.add(new QustionModel("ما هو الجهاز الذي يستخدم لإدخال البيانات في الحاسوب؟",
+        list[4] =(new QustionModel("ما هو الجهاز الذي يستخدم لإدخال البيانات في الحاسوب؟",
                 "أ) الشاشة","ب) الطابعة","ج) الفأرة","د) لوحة المفاتيح","د) لوحة المفاتيح"));
 
+        sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Gson gson = new Gson();
+        editor.putString("setEight", gson.toJson(list));
+        editor.commit();
+        String s = sharedPreferences.getString("setEight",null);
+        list = gson.fromJson(s,QustionModel[].class);
     }
 
 
     private void setNine() {
-        list.add(new QustionModel("ما هو النظام الذي يستخدم لتخزين البيانات والبرامج في الحاسوب؟",
+        list = new QustionModel[5];
+        list[0] =(new QustionModel("ما هو النظام الذي يستخدم لتخزين البيانات والبرامج في الحاسوب؟",
                 "أ) وحدة المعالجة المركزية","ب) الذاكرة العشوائية","ج) الذاكرة الدائمة","د) اللوحة الأم","ج) الذاكرة الدائمة"));
 
-        list.add(new QustionModel("ما هي العناصر التي تشكل مخطط الدائرة الكهربائية؟",
+        list[1] =(new QustionModel("ما هي العناصر التي تشكل مخطط الدائرة الكهربائية؟",
                 "أ) المقاومة والكابلات","ب) المصابيح والمحركات","ج) المقاومة والمكثفات والملفات الكهربائية","د) المحولات والبطاريات","ج) المقاومة والمكثفات والملفات الكهربائية"));
 
 
-        list.add(new QustionModel("ما هو البرنامج الذي يستخدم لتحرير الصور وتعديلها؟",
+        list[2] =(new QustionModel("ما هو البرنامج الذي يستخدم لتحرير الصور وتعديلها؟",
                 "أ) برنامج الرسم","ب) برنامج المعالجة النصية","ج)  برنامج المعالجة الصوتية","د) برنامج التحرير الرقمي للصور","د) برنامج التحرير الرقمي للصور"));
 
-        list.add(new QustionModel("ما هي وظيفة الشاشة في الحاسوب؟",
+        list[3] =(new QustionModel("ما هي وظيفة الشاشة في الحاسوب؟",
                 "أ) عرض النصوص والصور","ب) إدخال البيانات","ج) تخزين البيانات","د) نقل البيانات بين الحواسيب","أ) عرض النصوص والصور"));
 
-        list.add(new QustionModel("ما هو الجهاز الذي يستخدم لإدخال البيانات في الحاسوب؟",
+        list[4] =(new QustionModel("ما هو الجهاز الذي يستخدم لإدخال البيانات في الحاسوب؟",
                 "أ) الشاشة","ب) الطابعة","ج) الفأرة","د) لوحة المفاتيح","د) لوحة المفاتيح"));
 
+        sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Gson gson = new Gson();
+        editor.putString("setNine", gson.toJson(list));
+        editor.commit();
+        String s = sharedPreferences.getString("setNine",null);
+        list = gson.fromJson(s,QustionModel[].class);
     }
 
     private void setTwn() {
-        list.add(new QustionModel("ما هو النظام الذي يستخدم لتخزين البيانات والبرامج في الحاسوب؟",
+        list = new QustionModel[5];
+        list[0] =(new QustionModel("ما هو النظام الذي يستخدم لتخزين البيانات والبرامج في الحاسوب؟",
                 "أ) وحدة المعالجة المركزية","ب) الذاكرة العشوائية","ج) الذاكرة الدائمة","د) اللوحة الأم","ج) الذاكرة الدائمة"));
 
-        list.add(new QustionModel("ما هي العناصر التي تشكل مخطط الدائرة الكهربائية؟",
+        list[1] =(new QustionModel("ما هي العناصر التي تشكل مخطط الدائرة الكهربائية؟",
                 "أ) المقاومة والكابلات","ب) المصابيح والمحركات","ج) المقاومة والمكثفات والملفات الكهربائية","د) المحولات والبطاريات","ج) المقاومة والمكثفات والملفات الكهربائية"));
 
 
-        list.add(new QustionModel("ما هو البرنامج الذي يستخدم لتحرير الصور وتعديلها؟",
+        list[2] =(new QustionModel("ما هو البرنامج الذي يستخدم لتحرير الصور وتعديلها؟",
                 "أ) برنامج الرسم","ب) برنامج المعالجة النصية","ج)  برنامج المعالجة الصوتية","د) برنامج التحرير الرقمي للصور","د) برنامج التحرير الرقمي للصور"));
 
-        list.add(new QustionModel("ما هي وظيفة الشاشة في الحاسوب؟",
+        list[3] =(new QustionModel("ما هي وظيفة الشاشة في الحاسوب؟",
                 "أ) عرض النصوص والصور","ب) إدخال البيانات","ج) تخزين البيانات","د) نقل البيانات بين الحواسيب","أ) عرض النصوص والصور"));
 
-        list.add(new QustionModel("ما هو الجهاز الذي يستخدم لإدخال البيانات في الحاسوب؟",
+        list[4] =(new QustionModel("ما هو الجهاز الذي يستخدم لإدخال البيانات في الحاسوب؟",
                 "أ) الشاشة","ب) الطابعة","ج) الفأرة","د) لوحة المفاتيح","د) لوحة المفاتيح"));
 
+        sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Gson gson = new Gson();
+        editor.putString("setTwn", gson.toJson(list));
+        editor.commit();
+        String s = sharedPreferences.getString("setTwn",null);
+        list = gson.fromJson(s,QustionModel[].class);
     }
 
 

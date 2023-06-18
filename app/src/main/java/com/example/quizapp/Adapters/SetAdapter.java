@@ -19,9 +19,9 @@ import java.util.ArrayList;
 public class SetAdapter extends RecyclerView.Adapter<SetAdapter.viewHolder> {
 
     Context context;
-    ArrayList<SetModel>list;
+    SetModel[] list;
 
-    public SetAdapter(Context context, ArrayList<SetModel> list) {
+    public SetAdapter(Context context, SetModel[] list) {
         this.context = context;
         this.list = list;
     }
@@ -37,13 +37,14 @@ public class SetAdapter extends RecyclerView.Adapter<SetAdapter.viewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull viewHolder holder, int position) {
-        final SetModel model = list.get(position);
+        final SetModel model = list[position];
 
         holder.binding.setName.setText(model.getSetName());
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(context, QustionActivity.class);
+
                 intent.putExtra("set",model.getSetName());
                 context.startActivity(intent);
             }
@@ -52,7 +53,7 @@ public class SetAdapter extends RecyclerView.Adapter<SetAdapter.viewHolder> {
 
     @Override
     public int getItemCount() {
-        return  list.size();
+        return  list.length;
     }
 
     public class viewHolder extends RecyclerView.ViewHolder{

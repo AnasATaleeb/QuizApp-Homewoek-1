@@ -2,13 +2,17 @@ package com.example.quizapp.Activity;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
 import com.example.quizapp.MainActivity;
 import com.example.quizapp.R;
 import com.example.quizapp.databinding.ActivityScoreBinding;
+import com.google.gson.Gson;
 
 public class ScoreActivity extends AppCompatActivity {
 
@@ -22,8 +26,11 @@ public class ScoreActivity extends AppCompatActivity {
 
         getSupportActionBar().hide();
 
-        int totalScore = getIntent().getIntExtra("total",0 );
-        int correctAns = getIntent().getIntExtra("score",0);
+        SharedPreferences sharedPreferences = ScoreActivity.this.getSharedPreferences("main", Context.MODE_PRIVATE);
+        Gson gson = new Gson();
+
+        int totalScore = sharedPreferences.getInt("total",0);
+        int correctAns = sharedPreferences.getInt("score",0);
 
         int wrong =  totalScore - correctAns;
 
