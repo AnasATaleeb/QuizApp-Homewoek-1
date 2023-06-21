@@ -1,4 +1,4 @@
-# QuizApp-Homewoek-1 (v 2)
+# QuizApp-Homework-1 (v 2)
 #### The Android app is designed to assist elementary school students in their learning journey through an animated UI quiz. The app is user-friendly and engaging, with colorful graphics and interactive animations that make learning fun. The quiz covers a range of subjects, including physics, biology, chemistry, and technology, and is designed to test student's knowledge in a fun and interactive way. With this app, students can improve their learning outcomes while enjoying the process.
 ## Video for running the app : 
 https://github.com/AnasATaleeb/QuizApp-Homewoek-1/assets/102483320/1f8cea6c-7394-4479-ad7d-567dc069bb72
